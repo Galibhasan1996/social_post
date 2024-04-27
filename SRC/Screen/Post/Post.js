@@ -140,8 +140,16 @@ const Post = () => {
             Share.open({
                 message: `This massage from Social Post ${nameInput}`,
                 url: uri
+            }).then((res) => {
+                console.log(res);
+                showToast('success', 'Success', 'Share Successfully');
+                setnameInput("")
+                setUserNameInput("")
+                setCaptionInput("")
+                setCaptureImage("")
+            }).catch((err) => {
+                console.log(err)
             })
-
         });
     }
 
