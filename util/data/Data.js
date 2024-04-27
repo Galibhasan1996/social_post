@@ -18,5 +18,10 @@ export const SocialData = [
     {
         name: "Gmail",
         image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1jV6pSNPkChgtuCSGoUlciiQJFTIjsKLKrA&s"
-    }
+    },
+
 ]
+
+
+
+export const userImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDQITvcF--Fm4ciICLA3e8mto0m1-vFC5RRw&s"

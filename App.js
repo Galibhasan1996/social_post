@@ -1,19 +1,15 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, TextInput, Alert, ActivityIndicator, Modal, Dimensions, StatusBar, useColorScheme } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React from 'react'
+import AppNavigator from './SRC/AppNavigator/AppNavigator'
+import Toast from 'react-native-toast-message';
 
 const App = () => {
   return (
-    <View style={styles.container}>
-      <Text>App</Text>
-    </View>
+    <>
+      <AppNavigator />
+      <Toast />
+    </>
   )
 }
 
 export default App
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff"
-  }
-})
