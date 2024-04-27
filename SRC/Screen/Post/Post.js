@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList, ScrollView, TextInput, Alert, ActivityIndicator, Modal, Dimensions, StatusBar, useColorScheme, PermissionsAndroid } from 'react-native'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useRoute, useTheme } from '@react-navigation/native'
 import { AllColor } from '../../../util/color/Color'
 import { scale } from 'react-native-size-matters'
@@ -10,7 +10,8 @@ import Input from '../../../component/input/Input'
 import Button from '../../../component/button/Button'
 import Toast from 'react-native-toast-message'
 import { launchCamera, launchImageLibrary } from "react-native-image-picker"
-
+import ViewShot from "react-native-view-shot";
+import Share from 'react-native-share';
 const Post = () => {
     // ------------------ state ----------------
 
@@ -58,8 +59,7 @@ const Post = () => {
                 },
             );
             if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                // console.log('You can use the camera');
-                validation()
+                validationForCamera()
             } else {
                 console.log('Camera permission denied');
             }
@@ -67,12 +67,27 @@ const Post = () => {
             console.warn(err);
         }
     };
+
+
     // --------------- open camera ----------
 
     const openCamera = () => {
         launchCamera({ mediaType: "photo" }, (data) => {
             if (data.didCancel) {
                 showToast('error', 'Error', 'User cancelled camera picker');
+            } else {
+                console.log(data);
+                setCaptureImage(data.assets[0].uri);
+            }
+        });
+    }
+
+    // -------------- open gallery ---------
+
+    const openGallery = () => {
+        launchImageLibrary({ mediaType: "photo" }, (data) => {
+            if (data.didCancel) {
+                showToast('error', 'Error', 'User cancelled gallery picker');
             } else {
                 console.log(data);
                 setCaptureImage(data.assets[0].uri);
@@ -90,7 +105,7 @@ const Post = () => {
     }
 
     // ---------------validation------------
-    const validation = () => {
+    const validationForCamera = () => {
         if (nameInput === '') {
             showToast('error', 'Name', 'Name is required');
         } else if (userNameInput === "") {
@@ -98,25 +113,55 @@ const Post = () => {
         } else if (CaptionInput === "") {
             showToast('error', 'Caption', 'Caption is required');
         } else {
-            // console.log(nameInput, userNameInput, CaptionInput);
             openCamera()
         }
+    }
+
+    // ---------------validationForGallery ---------------
+    const validationForGallery = () => {
+        if (nameInput === '') {
+            showToast('error', 'Name', 'Name is required');
+        } else if (userNameInput === "") {
+            showToast('error', 'Username', 'UserName is required');
+        } else if (CaptionInput === "") {
+            showToast('error', 'Caption', 'Caption is required');
+        } else {
+            openGallery()
+        }
+    }
+
+    // ------------ref -----------
+    const ref = useRef()
+
+
+    // -------------share show ---------------
+    const ShareScreenShot = () => {
+        ref.current.capture().then(uri => {
+            Share.open({
+                message: `This massage from Social Post ${nameInput}`,
+                url: uri
+            })
+
+        });
     }
 
     return (
         <View style={[styles.container, BackGroundStyle.isBackGround]}>
             {/* --------------- share Button --------- */}
             {
-                showShare && <View style={styles.shareButtonContainer}>
-                    <TouchableOpacity>
-                        <Icon name="sharealt" size={30} color={isDark ? AllColor.white : AllColor.black} />
-                    </TouchableOpacity>
-                </View>
+                nameInput === "" || userNameInput === "" || CaptionInput === "" || CaptureImage === "" ? null :
+                    <View style={styles.shareButtonContainer}>
+                        <TouchableOpacity onPress={() => {
+                            ShareScreenShot()
+                        }}>
+                            <Icon name="sharealt" size={30} color={isDark ? AllColor.white : AllColor.black} />
+                        </TouchableOpacity>
+                    </View>
             }
             {/* ---------- Post text ---------- */}
             <Text style={[styles.icon_text, BackGroundStyle.isText]}>{`Create Post from : ${name}`}</Text>
             {/* -----------------    Post container start here ------------- */}
-            <View style={[styles.post_container, BackGroundStyle._isBackGround]}>
+            <ViewShot ref={ref} options={{ fileName: "Your-File-Name", format: "jpg", quality: 0.9 }} style={[styles.post_container, BackGroundStyle._isBackGround]}>
                 <View style={styles.image_container}>
                     {/* ---------  left image-------- */}
                     <View>
@@ -139,7 +184,7 @@ const Post = () => {
                 <View style={styles.caption_container}>
                     <Text style={BackGroundStyle._isText}>{`${CaptionInput === "" ? "Caption" : CaptionInput}`}</Text>
                 </View>
-            </View>
+            </ViewShot>
             {/* -------------- ScrollView------------- */}
             <ScrollView>
                 {/* ---------------- custom input here ----------------- */}
@@ -172,6 +217,9 @@ const Post = () => {
                 <Button
                     title={"Pick Image From Gallery"}
                     icon={"view-gallery"}
+                    onPress={() => {
+                        validationForGallery()
+                    }}
                 ></Button>
 
                 <Button
